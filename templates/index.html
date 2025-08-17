@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17 SDGs - Events Data Aggregator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h2>17 SDGs - Events Data Aggregator</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="scrapeForm">
+                            <div class="mb-4">
+                                <label for="freeFormatText" class="form-label fw-bold">Free Format Text</label>
+                                <textarea class="form-control" id="freeFormatText" name="free_format_text" rows="5" placeholder="Enter text with or without embedded URLs"></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Image</label>
+                                <div class="d-flex flex-column">
+                                    <div class="image-preview mb-2 d-flex justify-content-center align-items-center" id="imagePreviewContainer">
+                                        <div id="imagePlaceholder" class="text-center p-5 border rounded w-100">
+                                            <p>Paste an image from clipboard or drag and drop</p>
+                                        </div>
+                                        <img id="imagePreview" class="img-fluid d-none" alt="Image Preview">
+                                    </div>
+                                    <input type="file" class="form-control" id="imageInput" name="image" accept="image/*">
+                                    <input type="hidden" id="imageBase64" name="image_base64">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">PDF File</label>
+                                <input type="file" class="form-control" id="pdfInput" name="pdf_file" accept=".pdf">
+                                <div id="selectedFile" class="mt-2 text-muted"></div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary" id="runButton" disabled>Run</button>
+                            </div>
+                        </form>
+
+                        <div id="loadingIndicator" class="text-center mt-4 d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Processing data, this may take a few minutes...</p>
+                        </div>
+
+                        <div id="resultContainer" class="mt-4 d-none">
+                            <h4 class="text-center mb-3">Results</h4>
+                            <div class="alert alert-success" id="successMessage"></div>
+                            <div class="alert alert-danger d-none" id="errorMessage"></div>
+                            <div id="resultContent" class="border p-3 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/config.js"></script>
+    <script>
+        // Simple check to see if JavaScript is running
+        console.log('Basic JavaScript is working');
+        window.addEventListener('load', function() {
+            console.log('Window loaded');
+            // Check runButton directly
+            var runBtn = document.getElementById('runButton');
+            if (runBtn) {
+                console.log('Run button found directly:', runBtn.disabled);
+                // Try to enable it directly as a test
+                setTimeout(function() {
+                    runBtn.disabled = false;
+                    console.log('Tried to enable run button directly');
+                }, 2000);
+            }
+        });
+    </script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# Environment
+.env
+venv/
+.venv/
+venv1/
+.venv1/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Service account key
+*.json
+
+# Logs
+*.log
+
+# IDE files
+.idea/
+.vscode/
+
+# Temporary files
+tmp/
+temp/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/

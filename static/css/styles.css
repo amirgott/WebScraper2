@@ -1,0 +1,158 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    padding: 1.5rem;
+}
+
+.image-preview {
+    height: 200px;
+    border: 1px dashed #ccc;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    overflow: hidden;
+    position: relative;
+}
+
+#imagePreview {
+    max-height: 100%;
+    object-fit: contain;
+}
+
+#imagePlaceholder {
+    cursor: pointer;
+    color: #6c757d;
+    transition: all 0.3s;
+}
+
+#imagePlaceholder:hover {
+    background-color: #e9ecef;
+}
+
+#selectedFile {
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border: none;
+    padding: 0.75rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:disabled {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    cursor: not-allowed;
+}
+
+#resultContainer {
+    animation: fadeIn 0.5s;
+}
+/* Main styles for the 17 SDGs Event Data Aggregator */
+
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    padding: 15px;
+}
+
+.image-preview {
+    height: 200px;
+    border: 1px dashed #ced4da;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#imagePlaceholder {
+    cursor: pointer;
+    color: #6c757d;
+    background-color: #f8f9fa;
+    transition: background-color 0.2s;
+}
+
+#imagePlaceholder:hover {
+    background-color: #e9ecef;
+}
+
+#imagePreview {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+#selectedFile {
+    font-size: 0.9rem;
+}
+
+.field-name {
+    font-weight: bold;
+    width: 30%;
+}
+
+.field-value {
+    width: 70%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 15px;
+    }
+
+    .field-name, .field-value {
+        width: 100%;
+        display: block;
+    }
+
+    .field-name {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .field-value {
+        padding-top: 0;
+    }
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#resultContent {
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+}
+
+.field-name {
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.field-value {
+    margin-bottom: 0.5rem;
+}
