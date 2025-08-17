@@ -48,16 +48,7 @@ class URLWorkflow:
         for image_url in event_images:
             new_sources.append(('image', image_url))
 
-        # Add current URL to event record if any information was found
-        if event_record and any(event_record.values()):
-            if 'לינקים נוספים' in event_record:
-                if url not in event_record['לינקים נוספים']:
-                    if event_record['לינקים נוספים']:
-                        event_record['לינקים נוספים'] += f", {url}"
-                    else:
-                        event_record['לינקים נוספים'] = url
-            else:
-                event_record['לינקים נוספים'] = url
+        # Note: URL tracking for לינקים נוספים is now handled by the orchestrator
 
         # Log the sources that will be returned for further processing
         new_urls = [data for type_, data in new_sources if type_ == 'url']

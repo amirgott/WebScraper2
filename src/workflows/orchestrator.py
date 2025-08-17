@@ -19,6 +19,9 @@ class WorkflowOrchestrator:
         # Keep track of processed URLs to avoid duplicate processing
         self.processed_urls = set()
         self.processed_images = set()
+        
+        # Track URLs that were successfully scraped (for לינקים נוספים)
+        self.successfully_scraped_urls = set()
 
         # Track URL depth for hard-limiting crawling depth
         self.url_depths = {}
@@ -69,22 +72,18 @@ class WorkflowOrchestrator:
                 # Process URL for event info, but don't retrieve new URLs if at depth 1
                 if current_depth < 1:
                     source_event_record, new_sources = self.url_workflow.process(source_data)
+                    # Track successfully scraped URL (only add if event info was extracted)
+                    if source_event_record and any(source_event_record.values()):
+                        self.successfully_scraped_urls.add(source_data)
                 else:
                     # At depth 1, only extract event info, don't gather new sources
                     scrape_result = self.url_workflow.url_scraper.scrape(source_data)
                     scraped_text = scrape_result.get('scraped_text', '')
                     source_event_record = self.url_workflow.llm_client.extract_event_info(scraped_text, self.event_schema)
 
-                    # Add current URL to event record
+                    # Track successfully scraped URL (only add if event info was extracted)
                     if source_event_record and any(source_event_record.values()):
-                        if 'לינקים נוספים' in source_event_record:
-                            if source_data not in source_event_record['לינקים נוספים']:
-                                if source_event_record['לינקים נוספים']:
-                                    source_event_record['לינקים נוספים'] += f", {source_data}"
-                                else:
-                                    source_event_record['לינקים נוספים'] = source_data
-                        else:
-                            source_event_record['לינקים נוספים'] = source_data
+                        self.successfully_scraped_urls.add(source_data)
 
                     new_sources = []
             elif source_type == 'image':
@@ -117,6 +116,12 @@ class WorkflowOrchestrator:
 
                 # Add to queue with depth information
                 media_sources_queue.append((new_source_type, new_source_data, new_depth))
+
+        # Calculate weekday from date if weekday is empty but date exists
+        self._calculate_weekday_from_date()
+        
+        # Populate לינקים נוספים with successfully scraped URLs
+        self._populate_scraped_urls()
 
         # Write the final event record to the sheet
         self.sheet_client.append_event_record(self.target_event_record)
@@ -187,12 +192,86 @@ class WorkflowOrchestrator:
                     print(f"  DUPLICATE URL: URL '{url_value}' already exists in field '{field}'")
             else:  # free_text and other formats
                 # For free text, concatenate if they're different
-                if value not in target_value:
-                    if target_value:
-                        self.target_event_record[field] = f"{target_value}\n{value}"
+                # Handle type compatibility for comparison
+                value_str = ', '.join(value) if isinstance(value, list) else str(value)
+                target_str = ', '.join(target_value) if isinstance(target_value, list) else str(target_value)
+                
+                if value_str not in target_str:
+                    if target_str:
+                        self.target_event_record[field] = f"{target_str}\n{value_str}"
                         print(f"  CONCATENATED: For field '{field}', added new content")
                     else:
-                        self.target_event_record[field] = value
+                        self.target_event_record[field] = value_str
                         print(f"  ADDED TEXT: For field '{field}', set text value")
                 else:
                     print(f"  DUPLICATE TEXT: Content already exists in field '{field}'")
+
+    def _calculate_weekday_from_date(self):
+        """Calculate weekday from date field if weekday is empty"""
+        # Check if weekday is empty and date exists
+        if not self.target_event_record.get('Weekday', '') and self.target_event_record.get('תאריך', ''):
+            date_str = self.target_event_record['תאריך']
+            try:
+                # Parse date in DD.MM.YY format
+                from datetime import datetime
+                
+                # Handle potential 2-digit year
+                if len(date_str.split('.')) == 3:
+                    day, month, year = date_str.split('.')
+                    # Convert 2-digit year to 4-digit year
+                    if len(year) == 2:
+                        year = '20' + year
+                    
+                    # Create datetime object
+                    event_date = datetime(int(year), int(month), int(day))
+                    
+                    # Get weekday name in Hebrew
+                    weekday_names = {
+                        0: 'יום שני',    # Monday
+                        1: 'יום שלישי',  # Tuesday  
+                        2: 'יום רביעי',  # Wednesday
+                        3: 'יום חמישי',  # Thursday
+                        4: 'יום שישי',   # Friday
+                        5: 'יום שבת',    # Saturday
+                        6: 'יום ראשון'   # Sunday
+                    }
+                    
+                    weekday = weekday_names[event_date.weekday()]
+                    self.target_event_record['Weekday'] = weekday
+                    print(f"CALCULATED WEEKDAY: Set weekday to '{weekday}' from date '{date_str}'")
+                    
+            except (ValueError, IndexError) as e:
+                print(f"Error calculating weekday from date '{date_str}': {str(e)}")
+                # Add error to Error field
+                if 'Error' not in self.target_event_record:
+                    self.target_event_record['Error'] = ''
+                if self.target_event_record['Error']:
+                    self.target_event_record['Error'] += ', '
+                self.target_event_record['Error'] += f"Failed to calculate weekday from date: {date_str}"
+
+    def _populate_scraped_urls(self):
+        """Populate לינקים נוספים field with only successfully scraped URLs"""
+        if self.successfully_scraped_urls:
+            # Convert set to sorted list for consistent ordering
+            scraped_urls = sorted(list(self.successfully_scraped_urls))
+            
+            # Add to existing לינקים נוספים or create new
+            existing_urls = self.target_event_record.get('לינקים נוספים', '')
+            
+            if existing_urls:
+                # Handle existing URLs (could be string or list)
+                if isinstance(existing_urls, str):
+                    existing_url_list = [url.strip() for url in existing_urls.split(',')]
+                elif isinstance(existing_urls, list):
+                    existing_url_list = existing_urls
+                else:
+                    existing_url_list = [str(existing_urls)]
+                
+                # Combine with scraped URLs, avoiding duplicates
+                all_urls = existing_url_list + [url for url in scraped_urls if url not in existing_url_list]
+                self.target_event_record['לינקים נוספים'] = ', '.join(all_urls)
+            else:
+                # Set scraped URLs as the field value
+                self.target_event_record['לינקים נוספים'] = ', '.join(scraped_urls)
+            
+            print(f"POPULATED URLs: Added {len(scraped_urls)} successfully scraped URLs to לינקים נוספים")

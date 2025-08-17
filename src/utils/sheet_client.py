@@ -58,7 +58,12 @@ class SheetClient:
             #     row_values[1] = event_record['לינקים נוספים'].split(',')[0].strip()  # Set first URL
 
             # Append the row
-            all_strings_values = [", ".join(item) if isinstance(item, list) else item for item in row_values]
+            all_strings_values = []
+            for item in row_values:
+                if isinstance(item, list):
+                    all_strings_values.append(", ".join(item))
+                else:
+                    all_strings_values.append(str(item))
 
             self.sheet.append_row(all_strings_values)
             return True
