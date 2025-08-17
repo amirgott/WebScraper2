@@ -8,7 +8,7 @@ This application aggregates event data from various sources (text, URLs, images,
 - Processes free-format text with embedded URLs
 - OCR for images to extract event details
 - PDF text extraction
-- Recursive URL scraping (depth 1)
+- Hard-limited URL scraping (depth 0 and 1 only)
 - Validation and aggregation of information
 - Export to Google Sheets
 - LLM-powered information extraction using Google's Gemini model

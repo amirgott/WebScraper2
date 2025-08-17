@@ -51,10 +51,13 @@
     "description": "אם יש כתובת אימייל שאפשר לפנות אליה לקבל מידע"
   },
   "start date make": {
-    "description": "להשאיר ריק, יש כאן נוסחא"
+    "description": "להשאיר תמיד ריק"
   },
   "end date make": {
-    "description": "להשאיר ריק, יש כאן נוסחא"
+    "description": "להשאיר תמיד ריק"
+  },
+  "IN CALENDAR?": {
+    "description": "להשאיר תמיד ריק"
   },
   "Weekday": {
     "description": "יום בשבוע בישראל לפי התאריך!!"

@@ -26,6 +26,10 @@ class ImageWorkflow:
         if not ocr_text:
             return {}, []
 
+        # Log the size of extracted text
+        image_id = image_data if isinstance(image_data, str) else image_data.get('path', 'image file')
+        print(f"Image {image_id}: Extracted {len(ocr_text)} characters of text")
+
         # Extract event information from text
         event_record = self.llm_client.extract_event_info(ocr_text, self.event_schema)
 
@@ -46,5 +50,11 @@ class ImageWorkflow:
 
         # Prepare new sources to process
         new_sources = [('url', url) for url in urls]
+
+        # Log the sources that will be returned for further processing
+        image_id = image_data if isinstance(image_data, str) else image_data.get('path', 'image file')
+        print(f"Image {image_id}: Returning {len(urls)} URLs found in OCR text for further processing")
+        if urls:
+            print(f"  URLs from image: {', '.join(urls)}")
 
         return event_record, new_sources

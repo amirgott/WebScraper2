@@ -49,10 +49,18 @@ class SheetClient:
                 self.sheet.append_row(headers)
 
             # Prepare row values in the same order as headers
-            row_values = [event_record.get(header, '') for header in headers]
+            # import datetime
+            row_values = [''] * len(headers)  # Initialize with empty strings
+            for i, header in enumerate(headers):
+                row_values[i] = event_record.get(header, '')
+            # row_values[0] = datetime.datetime.now().strftime('%d.%m.%y %H:%M')  # Set current date and time
+            # if event_record.get('לינקים נוספים'):
+            #     row_values[1] = event_record['לינקים נוספים'].split(',')[0].strip()  # Set first URL
 
             # Append the row
-            self.sheet.append_row(row_values)
+            all_strings_values = [", ".join(item) if isinstance(item, list) else item for item in row_values]
+
+            self.sheet.append_row(all_strings_values)
             return True
         except Exception as e:
             print(f"Error appending to sheet: {str(e)}")
