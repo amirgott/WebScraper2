@@ -30,6 +30,7 @@ class LLMClient:
                 prompt,
                 generation_config=generation_config
             )
+            print(response)
             return response.text
         except Exception as e:
             print(f"Error in LLM processing: {str(e)}")
