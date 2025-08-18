@@ -1,7 +1,5 @@
 from src.workflows.free_format_workflow import FreeFormatWorkflow
 from src.workflows.url_workflow import URLWorkflow
-from src.workflows.image_workflow import ImageWorkflow
-from src.workflows.pdf_workflow import PDFWorkflow
 from src.utils.sheet_client import SheetClient
 
 class WorkflowOrchestrator:
@@ -10,8 +8,6 @@ class WorkflowOrchestrator:
         self.event_schema = event_schema
         self.free_format_workflow = FreeFormatWorkflow(event_schema)
         self.url_workflow = URLWorkflow(event_schema)
-        self.image_workflow = ImageWorkflow(event_schema)
-        self.pdf_workflow = PDFWorkflow(event_schema)
 
         # Initialize sheet client
         self.sheet_client = SheetClient()
@@ -29,7 +25,7 @@ class WorkflowOrchestrator:
         # Initialize the target event record
         self.target_event_record = {field: '' for field in event_schema.keys()}
 
-    def run(self, free_format_text, image_data, pdf_data):
+    def run(self, free_format_text):
         """Run all workflows and aggregate results"""
         # Queue for pending media sources
         media_sources_queue = []
@@ -37,12 +33,6 @@ class WorkflowOrchestrator:
         # Add initial media sources to the queue
         if free_format_text:
             media_sources_queue.append(('free_format', free_format_text, 0))
-
-        if image_data:
-            media_sources_queue.append(('image', image_data, 0))
-
-        if pdf_data:
-            media_sources_queue.append(('pdf', pdf_data, 0))
 
         # Process media sources until the queue is empty
         while media_sources_queue:
@@ -86,17 +76,6 @@ class WorkflowOrchestrator:
                         self.successfully_scraped_urls.add(source_data)
 
                     new_sources = []
-            elif source_type == 'image':
-                # For image URLs, skip if already processed
-                if isinstance(source_data, str) and source_data in self.processed_images:
-                    continue
-                if isinstance(source_data, str):
-                    self.processed_images.add(source_data)
-
-                # Process image for event info
-                source_event_record, new_sources = self.image_workflow.process(source_data, self.target_event_record)
-            elif source_type == 'pdf':
-                source_event_record, new_sources = self.pdf_workflow.process(source_data, self.target_event_record)
             else:
                 continue
 

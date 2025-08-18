@@ -44,43 +44,9 @@ def run_scrape():
         free_format_text = request.form.get('free_format_text', '')
         app.logger.info(f"Free format text: {free_format_text[:100] if free_format_text else 'None'}")  # Log first 100 chars
 
-        # Handle image if provided
-        image_data = None
-        if 'image' in request.files and request.files['image'].filename:
-            image_file = request.files['image']
-            # Save to temporary file
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
-                image_file.save(temp_file.name)
-                image_path = temp_file.name
-            image_data = {'type': 'file', 'path': image_path}
-        elif 'image_base64' in request.form and request.form['image_base64']:
-            # Handle base64 encoded image (for clipboard paste)
-            base64_data = request.form['image_base64'].split(',')[1] if ',' in request.form['image_base64'] else request.form['image_base64']
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
-                temp_file.write(base64.b64decode(base64_data))
-                image_path = temp_file.name
-            image_data = {'type': 'file', 'path': image_path}
-
-        # Handle PDF if provided
-        pdf_data = None
-        if 'pdf_file' in request.files and request.files['pdf_file'].filename:
-            pdf_file = request.files['pdf_file']
-            filename = secure_filename(pdf_file.filename)
-            # Save to temporary file
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
-                pdf_file.save(temp_file.name)
-                pdf_path = temp_file.name
-            pdf_data = {'type': 'file', 'path': pdf_path, 'original_name': filename}
-
         # Initialize orchestrator and run workflows
         orchestrator = WorkflowOrchestrator(event_schema)
-        result = orchestrator.run(free_format_text, image_data, pdf_data)
-
-        # Clean up temporary files
-        if image_data and os.path.exists(image_data['path']):
-            os.unlink(image_data['path'])
-        if pdf_data and os.path.exists(pdf_data['path']):
-            os.unlink(pdf_data['path'])
+        result = orchestrator.run(free_format_text)
 
         return jsonify({
             'success': True,
