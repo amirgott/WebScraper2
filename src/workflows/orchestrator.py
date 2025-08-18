@@ -59,7 +59,7 @@ class WorkflowOrchestrator:
                     self.url_depths[source_data] = 0
                     source_event_record, new_sources = self.url_workflow.process(source_data)
                 else:
-                    source_event_record, new_sources = self.free_format_workflow.process(source_data)
+                    source_event_record, new_sources = self.free_format_workflow.process(source_data, self.target_event_record)
             elif source_type == 'url':
                 # Skip if already processed
                 if source_data in self.processed_urls:
@@ -71,7 +71,7 @@ class WorkflowOrchestrator:
 
                 # Process URL for event info, but don't retrieve new URLs if at depth 1
                 if current_depth < 1:
-                    source_event_record, new_sources = self.url_workflow.process(source_data)
+                    source_event_record, new_sources = self.url_workflow.process(source_data, self.target_event_record)
                     # Track successfully scraped URL (only add if event info was extracted)
                     if source_event_record and any(source_event_record.values()):
                         self.successfully_scraped_urls.add(source_data)
@@ -79,7 +79,7 @@ class WorkflowOrchestrator:
                     # At depth 1, only extract event info, don't gather new sources
                     scrape_result = self.url_workflow.url_scraper.scrape(source_data)
                     scraped_text = scrape_result.get('scraped_text', '')
-                    source_event_record = self.url_workflow.llm_client.extract_event_info(scraped_text, self.event_schema)
+                    source_event_record = self.url_workflow.llm_client.extract_event_info(scraped_text, self.event_schema, self.target_event_record)
 
                     # Track successfully scraped URL (only add if event info was extracted)
                     if source_event_record and any(source_event_record.values()):
@@ -94,9 +94,9 @@ class WorkflowOrchestrator:
                     self.processed_images.add(source_data)
 
                 # Process image for event info
-                source_event_record, new_sources = self.image_workflow.process(source_data)
+                source_event_record, new_sources = self.image_workflow.process(source_data, self.target_event_record)
             elif source_type == 'pdf':
-                source_event_record, new_sources = self.pdf_workflow.process(source_data)
+                source_event_record, new_sources = self.pdf_workflow.process(source_data, self.target_event_record)
             else:
                 continue
 

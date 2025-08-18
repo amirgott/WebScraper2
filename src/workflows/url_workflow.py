@@ -8,7 +8,7 @@ class URLWorkflow:
         self.url_scraper = URLScraper()
         self.llm_client = LLMClient()
 
-    def process(self, url):
+    def process(self, url, existing_event_record=None):
         """Process a URL and extract potential URLs for depth 1 scraping
         Note: This method returns potential depth 1 URLs, but the orchestrator
         decides whether to process them based on current depth"""
@@ -28,7 +28,7 @@ class URLWorkflow:
         print(f"URL {url}: Extracted {len(scraped_text)} characters of text, {len(scraped_urls)} raw URLs")
 
         # Extract event information from text
-        event_record = self.llm_client.extract_event_info(scraped_text, self.event_schema)
+        event_record = self.llm_client.extract_event_info(scraped_text, self.event_schema, existing_event_record)
 
         # Find event-related URLs
         event_urls = self.llm_client.find_event_related_urls(scraped_urls)

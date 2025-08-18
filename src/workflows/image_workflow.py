@@ -8,7 +8,7 @@ class ImageWorkflow:
         self.image_processor = ImageProcessor()
         self.llm_client = LLMClient()
 
-    def process(self, image_data):
+    def process(self, image_data, existing_event_record=None):
         """Process an image (URL or file)"""
         # Skip empty image data
         if not image_data:
@@ -31,7 +31,7 @@ class ImageWorkflow:
         print(f"Image {image_id}: Extracted {len(ocr_text)} characters of text")
 
         # Extract event information from text
-        event_record = self.llm_client.extract_event_info(ocr_text, self.event_schema)
+        event_record = self.llm_client.extract_event_info(ocr_text, self.event_schema, existing_event_record)
 
         # Add image URL to event record if any information was found
         if event_record and any(event_record.values()):

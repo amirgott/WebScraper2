@@ -1,3 +1,5 @@
+from datetime import date
+
 import google.generativeai as genai
 from src.utils.config import get_gemini_api_key
 
@@ -33,10 +35,10 @@ class LLMClient:
             print(f"Error in LLM processing: {str(e)}")
             return None
 
-    def extract_event_info(self, text, schema):
+    def extract_event_info(self, text, schema, existing_event_record=None):
         """Extract event information from text using LLM"""
         # Build prompt for extracting event info
-        prompt = self._build_event_extraction_prompt(text, schema)
+        prompt = self._build_event_extraction_prompt(text, schema, existing_event_record)
         response = self.process_data(
             prompt,
             generation_config_override={"response_mime_type": "application/json"}
@@ -110,17 +112,38 @@ class LLMClient:
             return [url.strip() for url in response.strip().split('\n') if url.strip().startswith('http')]
         return []
 
-    def _build_event_extraction_prompt(self, text, schema):
+    def _build_event_extraction_prompt(self, text, schema, existing_event_record=None):
         """Build prompt for extracting event information"""
         schema_description = "\n".join([f"{field}: {info['description']}" for field, info in schema.items()])
+
+        # Build existing event context if provided
+        existing_context = ""
+        if existing_event_record:
+            # Filter out empty fields for context
+            non_empty_fields = {k: v for k, v in existing_event_record.items() if v and str(v).strip()}
+            if non_empty_fields:
+                existing_values = "\n".join([f"{field}: {value}" for field, value in non_empty_fields.items()])
+                existing_context = f"""
+        
+        EXISTING EVENT INFORMATION:
+        We already have partial information about an event. Only extract information from the text if it relates to the SAME event as described below. If the text appears to describe a different event or contains too many contradictions to the existing information, return an empty JSON object {{}}.
+        
+        Current event details:
+        {existing_values}
+        
+        INSTRUCTION: Assess whether the new text relates to the same event. If it does, extract only additional or consistent information. If it describes a different event or has major contradictions, return empty fields."""
 
         prompt = f"""
         Extract information about an event from the following text. The information should be structured according to these fields:
 
-        {schema_description}
+        {schema_description}{existing_context}
 
         Format your response as a JSON object with the field names as keys. If information for a field is not available, 
         use an empty string for that field. For the 'תעשיה' field, select from the 17 UN SDGs based on the content.
+        For the 'לינק להרשמה' field, check the below text for a section that include such a link and extract the URL 
+        or if there's a form for registration put in the URL the text was extracted from.
+        Never estimate values. Specifically for 'משעה' and 'עד שעה', assign values only if they explicitly appear in the text.
+        Note the current date and time when extracting the information: {date.today()}. If no year is specified, assume the current year.
 
         TEXT:
         {text}

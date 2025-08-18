@@ -8,7 +8,7 @@ class PDFWorkflow:
         self.pdf_processor = PDFProcessor()
         self.llm_client = LLMClient()
 
-    def process(self, pdf_data):
+    def process(self, pdf_data, existing_event_record=None):
         """Process a PDF file"""
         # Skip empty PDF data
         if not pdf_data:
@@ -26,7 +26,7 @@ class PDFWorkflow:
             return {}, []
 
         # Extract event information from text
-        event_record = self.llm_client.extract_event_info(pdf_text, self.event_schema)
+        event_record = self.llm_client.extract_event_info(pdf_text, self.event_schema, existing_event_record)
 
         # Add original file name to event record if any information was found
         if event_record and any(event_record.values()) and original_name:

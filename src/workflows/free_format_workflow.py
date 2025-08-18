@@ -6,14 +6,14 @@ class FreeFormatWorkflow:
         self.event_schema = event_schema
         self.llm_client = LLMClient()
 
-    def process(self, text):
+    def process(self, text, existing_event_record=None):
         """Process free format text"""
         # Skip empty text
         if not text:
             return {}, []
 
         # Extract event information
-        event_record = self.llm_client.extract_event_info(text, self.event_schema)
+        event_record = self.llm_client.extract_event_info(text, self.event_schema, existing_event_record)
 
         # Find URLs in the text
         urls = self.llm_client.find_urls_in_text(text)
