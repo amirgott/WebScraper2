@@ -1,26 +1,29 @@
 import gspread
 from google.oauth2.service_account import Credentials
 import os
-from src.utils.config import get_google_sheet_id, get_service_account_file
+import tempfile
+from src.utils.config import get_google_sheet_id, get_service_account_json
 
 class SheetClient:
     def __init__(self):
         """Initialize the Google Sheets client"""
         self.sheet_id = get_google_sheet_id()
-        self.service_account_file = get_service_account_file()
+        service_account_json = get_service_account_json()
 
         if not self.sheet_id:
             raise ValueError("GOOGLE_SHEET_ID environment variable not set")
 
-        if not self.service_account_file:
-            raise ValueError("SERVICE_ACCOUNT_FILE environment variable not set")
+        if not service_account_json:
+            raise ValueError("SERVICE_ACCOUNT_JSON environment variable not set")
 
-        if not os.path.exists(self.service_account_file):
-            raise FileNotFoundError(f"Service account file not found: {self.service_account_file}")
+        # Write the content to a temporary file
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as temp_file:
+            temp_file.write(service_account_json)
+            temp_file_path = temp_file.name
 
         # Authenticate with Google Sheets API
         self.scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        self.creds = Credentials.from_service_account_file(self.service_account_file, scopes=self.scope)
+        self.creds = Credentials.from_service_account_file(temp_file_path, scopes=self.scope)
         self.client = gspread.authorize(self.creds)
 
         # Open the spreadsheet
@@ -28,6 +31,8 @@ class SheetClient:
             self.sheet = self.client.open_by_key(self.sheet_id).sheet1
         except Exception as e:
             raise Exception(f"Error opening Google Sheet: {str(e)}")
+        finally:
+            os.unlink(temp_file_path)
 
     def get_headers(self):
         """Get the headers (first row) of the sheet"""

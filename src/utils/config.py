@@ -47,6 +47,6 @@ def get_google_sheet_id():
     """Get Google Sheet ID"""
     return get_env_variable('GOOGLE_SHEET_ID')
 
-def get_service_account_file():
+def get_service_account_json():
     """Get path to service account credentials file"""
-    return get_env_variable('SERVICE_ACCOUNT_FILE')
+    return get_env_variable('SERVICE_ACCOUNT_JSON')
