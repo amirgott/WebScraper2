@@ -18,4 +18,4 @@ COPY . .
 EXPOSE 8080
 
 # Command to run the application
-CMD gunicorn --bind 0.0.0.0:${PORT} -c gunicorn.conf.py app:app
+CMD gunicorn --bind 0.0.0.0:${PORT} -c gunicorn.conf.py --log-level=debug --access-logfile=- --error-logfile=- app:app
