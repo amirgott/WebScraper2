@@ -25,6 +25,7 @@ class SheetClient:
         self.scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         self.creds = Credentials.from_service_account_file(temp_file_path, scopes=self.scope)
         self.client = gspread.authorize(self.creds)
+        print(f"Authenticated with service account email: {self.client.auth.service_account_email()}")
 
         # Open the spreadsheet
         try:
