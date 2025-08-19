@@ -4,11 +4,6 @@ WORKDIR /app
 
 # Install system dependencies for EasyOCR
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -20,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 8080
 
 # Command to run the application
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
