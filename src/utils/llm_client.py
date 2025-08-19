@@ -39,11 +39,11 @@ class LLMClient:
     def extract_event_info(self, text, schema, existing_event_record=None):
         """Extract event information from text using LLM"""
         # Build prompt for extracting event info
-        # prompt = self._build_event_extraction_prompt(text, schema, existing_event_record)
-        # response = self.process_data(
-        #     prompt,
-        #     generation_config_override={"response_mime_type": "application/json"}
-        # )
+        prompt = self._build_event_extraction_prompt(text, schema, existing_event_record)
+        response = self.process_data(
+            "return a number from 1 to 5",
+            generation_config_override={"response_mime_type": "application/json"}
+        )
         #
         # if not response:
         #     return {}
