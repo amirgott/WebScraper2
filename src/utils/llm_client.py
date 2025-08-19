@@ -39,23 +39,24 @@ class LLMClient:
     def extract_event_info(self, text, schema, existing_event_record=None):
         """Extract event information from text using LLM"""
         # Build prompt for extracting event info
-        prompt = self._build_event_extraction_prompt(text, schema, existing_event_record)
-        response = self.process_data(
-            prompt,
-            generation_config_override={"response_mime_type": "application/json"}
-        )
-
-        if not response:
-            return {}
-
-        # Parse the response into a structured event record
-        try:
-            import json
-            return json.loads(response)
-        except Exception as e:
-            print(f"Error parsing LLM response: {str(e)}")
-            print(f"Raw response: {response}")
-            return {}
+        # prompt = self._build_event_extraction_prompt(text, schema, existing_event_record)
+        # response = self.process_data(
+        #     prompt,
+        #     generation_config_override={"response_mime_type": "application/json"}
+        # )
+        #
+        # if not response:
+        #     return {}
+        #
+        # # Parse the response into a structured event record
+        # try:
+        #     import json
+        #     return json.loads(response)
+        # except Exception as e:
+        #     print(f"Error parsing LLM response: {str(e)}")
+        #     print(f"Raw response: {response}")
+        #     return {}
+        return existing_event_record or {}
 
 
     def find_urls_in_text(self, text):
