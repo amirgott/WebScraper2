@@ -1,12 +1,13 @@
 from src.scrapers.url_scraper import URLScraper
-from src.utils.llm_client import LLMClient
+from src.utils.llm_client import GenaiLLMClient, get_llm_client
+
 
 class URLWorkflow:
-    def __init__(self, event_schema):
+    def __init__(self, event_schema, llm_client):
         """Initialize the URL workflow"""
         self.event_schema = event_schema
         self.url_scraper = URLScraper()
-        self.llm_client = LLMClient()
+        self.llm_client = llm_client
 
     def process(self, url, existing_event_record=None):
         """Process a URL and extract potential URLs for depth 1 scraping

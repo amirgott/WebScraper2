@@ -1,62 +1,52 @@
+from abc import ABC, abstractmethod
 from datetime import date
 
-import google.generativeai as genai
-from src.utils.config import get_gemini_api_key
+try:
+    import google.generativeai as genai
+except ImportError:
+    print("Warning: 'google.generativeai' not found. GenaiLLMClient will not be usable.")
+    genai = None
 
-class LLMClient:
+try:
+    import openai
+except ImportError:
+    print("Warning: 'openai' not found. OpenAiLLMClient will not be usable.")
+    openai = None
+
+from src.utils.config import get_gemini_api_key, get_openai_api_key
+
+class LLMClient(ABC):
+    @abstractmethod
     def __init__(self):
-        """Initialize the LLM client with Gemini model"""
-        api_key = get_gemini_api_key()
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY environment variable not set")
+        """Initialize the LLM client into self.model """
+        pass
 
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-pro')
-
+    @abstractmethod
     def process_data(self, prompt, temperature=0.0, generation_config_override=None
 ):
-        """Process data with the LLM model"""
-        try:
-            config_dict = {
-                "temperature": temperature,
-                "max_output_tokens": 8192,
-            }
-            if generation_config_override:
-                config_dict.update(generation_config_override)
-
-            generation_config = genai.GenerationConfig(**config_dict)
-
-            response = self.model.generate_content(
-                prompt,
-                generation_config=generation_config
-            )
-            print(response)
-            return response.text
-        except Exception as e:
-            print(f"Error in LLM processing: {str(e)}")
-            return None
+        """Process data with the LLM model
+        return the response text or None if an error occurred"""
+        pass
 
     def extract_event_info(self, text, schema, existing_event_record=None):
         """Extract event information from text using LLM"""
         # Build prompt for extracting event info
         prompt = self._build_event_extraction_prompt(text, schema, existing_event_record)
-        response = self.process_data(
-            "return a number from 1 to 5",
+        response = self.process_data(prompt,
             generation_config_override={"response_mime_type": "application/json"}
         )
-        #
-        # if not response:
-        #     return {}
-        #
-        # # Parse the response into a structured event record
-        # try:
-        #     import json
-        #     return json.loads(response)
-        # except Exception as e:
-        #     print(f"Error parsing LLM response: {str(e)}")
-        #     print(f"Raw response: {response}")
-        #     return {}
-        return existing_event_record or {}
+
+        if not response:
+            return {}
+
+        # Parse the response into a structured event record
+        try:
+            import json
+            return json.loads(response)
+        except Exception as e:
+            print(f"Error parsing LLM response: {str(e)}")
+            print(f"Raw response: {response}")
+            return {}
 
 
     def find_urls_in_text(self, text):
@@ -151,3 +141,120 @@ class LLMClient:
         {text}
         """
         return prompt
+
+
+class GenaiLLMClient(LLMClient):
+
+    def __init__(self):
+        """Initialize the LLM client with Gemini model"""
+        api_key = get_gemini_api_key()
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY environment variable not set")
+
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel('gemini-2.5-pro')
+
+    def process_data(self, prompt, temperature=0.0, generation_config_override=None
+                     ):
+        """Process data with the LLM model"""
+        try:
+            config_dict = {
+                "temperature": temperature,
+                "max_output_tokens": 8192,
+            }
+            if generation_config_override:
+                config_dict.update(generation_config_override)
+
+            generation_config = genai.GenerationConfig(**config_dict)
+
+            response = self.model.generate_content(
+                prompt,
+                generation_config=generation_config
+            )
+            print(response)
+            return response.text
+        except Exception as e:
+            print(f"Error in LLM processing: {str(e)}")
+            return None
+
+
+class OpenAiLLMClient(LLMClient):
+
+    def __init__(self, model="gpt-4o"):
+        """Initialize the LLM client with an OpenAI model"""
+        api_key = get_openai_api_key()
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable not set")
+
+        # The 'model' attribute is named for consistency with the abstract class,
+        # but it holds the client instance.
+        self.client = openai.OpenAI(api_key=api_key)
+        self.model_name = model
+
+    def process_data(self, prompt, temperature=0.0, generation_config_override=None):
+        """Process data with the OpenAI model"""
+        try:
+            # Prepare parameters for the OpenAI API call
+            params = {
+                "model": self.model_name,
+                "temperature": temperature,
+                "max_tokens": 4096,  # A sensible default, adjust as needed
+                "messages": [{"role": "user", "content": prompt}]
+            }
+
+            # Translate generation_config_override to OpenAI-specific parameters
+            if generation_config_override:
+                if generation_config_override.get("response_mime_type") == "application/json":
+                    params["response_format"] = {"type": "json_object"}
+
+            # Make the API call
+            response = self.client.chat.completions.create(**params)
+
+            # Extract and return the response text
+            return response.choices[0].message.content.strip()
+
+        except Exception as e:
+            print(f"Error in OpenAI LLM processing: {str(e)}")
+            return None
+
+# --- Factory Implementation ---
+
+# Module-level dictionary to cache client instances
+_llm_clients = {}
+
+def get_llm_client(client_name: str) -> LLMClient:
+    """
+    Factory function to get an LLM client instance.
+
+    This function uses a cache to ensure that only one instance of each
+    client type is created during the application's lifecycle.
+
+    Args:
+        client_name (str): The name of the client to retrieve ('OpenAi' or 'Genai').
+
+    Returns:
+        LLMClient: An instance of the requested LLM client.
+
+    Raises:
+        ValueError: If the client_name is not supported.
+    """
+    # Normalize the name to handle different casings (e.g., 'openai', 'OpenAI')
+    normalized_name = client_name.lower()
+
+    # If the client already exists in our cache, return it
+    if normalized_name in _llm_clients:
+        print(f"Returning cached '{client_name}' client.")
+        return _llm_clients[normalized_name]
+
+    # If not cached, create a new instance
+    print(f"Creating new '{client_name}' client.")
+    if normalized_name == 'openai':
+        client = OpenAiLLMClient()
+        _llm_clients[normalized_name] = client
+        return client
+    elif normalized_name == 'genai':
+        client = GenaiLLMClient()
+        _llm_clients[normalized_name] = client
+        return client
+    else:
+        raise ValueError(f"Unsupported LLM client: '{client_name}'. Please use 'OpenAi' or 'Genai'.")

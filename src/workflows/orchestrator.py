@@ -1,3 +1,5 @@
+from src.utils import config
+from src.utils.llm_client import get_llm_client
 from src.workflows.free_format_workflow import FreeFormatWorkflow
 from src.workflows.url_workflow import URLWorkflow
 from src.utils.sheet_client import SheetClient
@@ -6,8 +8,10 @@ class WorkflowOrchestrator:
     def __init__(self, event_schema):
         """Initialize the workflow orchestrator"""
         self.event_schema = event_schema
-        self.free_format_workflow = FreeFormatWorkflow(event_schema)
-        self.url_workflow = URLWorkflow(event_schema)
+        llm_client = get_llm_client(config.get_llm_client_name())
+        self.free_format_workflow = FreeFormatWorkflow(event_schema, llm_client)
+        self.url_workflow = URLWorkflow(event_schema, llm_client)
+        self.llm_client = llm_client
 
         # Initialize sheet client
         self.sheet_client = SheetClient()

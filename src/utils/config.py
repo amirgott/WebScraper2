@@ -43,6 +43,14 @@ def get_gemini_api_key():
     """Get Google Gemini API key"""
     return get_env_variable('GEMINI_API_KEY')
 
+def get_openai_api_key():
+    """Retrieves the OpenAI API key from environment variables."""
+    return get_env_variable("OPENAI_API_KEY")
+
+def get_llm_client_name():
+    """Get LLM client name"""
+    return get_env_variable('LLM_CLIENT_NAME')
+
 def get_google_sheet_id():
     """Get Google Sheet ID"""
     return get_env_variable('GOOGLE_SHEET_ID')
