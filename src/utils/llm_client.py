@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import date
 
+import httpx
+
 try:
     import google.generativeai as genai
 except ImportError:
@@ -180,7 +182,7 @@ class GenaiLLMClient(LLMClient):
 
 class OpenAiLLMClient(LLMClient):
 
-    def __init__(self, model="gpt-4o"):
+    def __init__(self, model="gpt-3.5-turbo"):
         """Initialize the LLM client with an OpenAI model"""
         api_key = get_openai_api_key()
         if not api_key:
@@ -188,7 +190,10 @@ class OpenAiLLMClient(LLMClient):
 
         # The 'model' attribute is named for consistency with the abstract class,
         # but it holds the client instance.
-        self.client = openai.OpenAI(api_key=api_key)
+        self.client = openai.OpenAI(api_key=api_key,
+                                    http_client=httpx.Client(timeout=180.0)
+                                    )
+        print(f"Using OpenAI model: {model} and timeout 180 seconds")
         self.model_name = model
 
     def process_data(self, prompt, temperature=0.0, generation_config_override=None):

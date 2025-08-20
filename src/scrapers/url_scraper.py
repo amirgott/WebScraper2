@@ -25,6 +25,7 @@ class URLScraper:
 
             # Extract text content
             text = soup.get_text(separator=' ').strip()
+            print(f"Extracted text of length {len(text)} from {url}")
 
             # Extract URLs
             base_url = f"{urlparse(url).scheme}://{urlparse(url).netloc}"

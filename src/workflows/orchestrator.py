@@ -122,7 +122,7 @@ class WorkflowOrchestrator:
             target_value = self.target_event_record.get(field, '')
 
             # Log the field being processed
-            print(f"Validating field '{field}': New value = '{value}', Current value = '{target_value}'")
+            # print(f"Validating field '{field}': New value = '{value}', Current value = '{target_value}'")
 
             # Determine field format
             field_format = self.event_schema.get(field, {}).get('format', 'free_text')
@@ -131,10 +131,10 @@ class WorkflowOrchestrator:
             if not target_value:
                 # If target is empty, just use the source value
                 self.target_event_record[field] = value
-                print(f"  ADDED NEW: Field '{field}' was empty, setting to '{value}'")
+                # print(f"  ADDED NEW: Field '{field}' was empty, setting to '{value}'")
             elif value == target_value:
                 # If values are identical, they are validated
-                print(f"  VALIDATED: Value for '{field}' is identical to existing value")
+                # print(f"  VALIDATED: Value for '{field}' is identical to existing value")
                 pass
             elif field_format in ['date', 'time', 'day_of_week', 'event_type']:
                 # For strict formats, flag conflicts
@@ -151,15 +151,15 @@ class WorkflowOrchestrator:
                     self.target_event_record['Error'] += f"Conflicting {field}: {target_value} vs {value}"
 
                     # Keep the original value for now
-                    print(f"  KEEPING ORIGINAL: Using '{target_value}' for field '{field}'")
+                    # print(f"  KEEPING ORIGINAL: Using '{target_value}' for field '{field}'")
             elif field_format == 'sdg_list':
                 # For SDG list, combine unique values
                 target_list = target_value.split(', ') if isinstance(target_value, str) else target_value
                 source_list = value.split(', ') if isinstance(value, str) else value
                 combined_values = set(target_list + source_list)
                 self.target_event_record[field] = ', '.join([v for v in combined_values if v])
-                print(f"  MERGED LIST: For field '{field}', combined values from '{target_value}' and '{value}'")
-                print(f"    RESULT: '{self.target_event_record[field]}'")
+                # print(f"  MERGED LIST: For field '{field}', combined values from '{target_value}' and '{value}'")
+                # print(f"    RESULT: '{self.target_event_record[field]}'")
             elif field_format == 'url':
                 # For URLs, keep both if they're different
                 # Convert value to string if it's a list
