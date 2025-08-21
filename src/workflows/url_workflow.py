@@ -25,9 +25,6 @@ class URLWorkflow:
         scraped_urls = [url[1] for url in scrape_result.get('scraped_urls', [])]
         scraped_imgs = scrape_result.get('scraped_imgs', [])
 
-        # Log the size of extracted text and number of URLs
-        print(f"URL {url}: Extracted {len(scraped_text)} characters of text, {len(scraped_urls)} raw URLs")
-
         # Extract event information from text
         event_record = self.llm_client.extract_event_info(scraped_text, self.event_schema, existing_event_record)
 

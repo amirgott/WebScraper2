@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import date
 
-import httpx
 
 try:
     import google.generativeai as genai
@@ -14,6 +13,8 @@ try:
 except ImportError:
     print("Warning: 'openai' not found. OpenAiLLMClient will not be usable.")
     openai = None
+
+import httpx
 
 from src.utils.config import get_gemini_api_key, get_openai_api_key
 
@@ -119,42 +120,45 @@ class LLMClient(ABC):
                 existing_values = "\n".join([f"{field}: {value}" for field, value in non_empty_fields.items()])
                 existing_context = f"""
         
-        EXISTING EVENT INFORMATION:
-        We already have partial information about an event. Only extract information from the text if it relates to the SAME event as described below. If the text appears to describe a different event or contains too many contradictions to the existing information, return an empty JSON object {{}}.
+        IMPORTANT: EXISTING EVENT INFORMATION:
+        We already have partial information about an event. You will only extract information from the text if it relates to the SAME event as described below. 
+        So you'll have to assess whether the TEXT relates to the same event as the existing, 
+        and If the text appears to describe a different event or contains too many contradictions to the existing information, return an empty JSON object {{}}.
         
-        Current event details:
+        Existing event details:
         {existing_values}
-        
-        INSTRUCTION: Assess whether the new text relates to the same event. If it does, extract only additional or consistent information. If it describes a different event or has major contradictions, return empty fields."""
+        """
 
         prompt = f"""
-        Extract information about an event from the following text. The information should be structured according to these fields:
+        Your task is to extract information about an event from the TEXT below. The information should be structured according to these fields:
 
-        {schema_description}{existing_context}
+        {schema_description}
 
-        Format your response as a JSON object with the field names as keys. If information for a field is not available, 
-        use an empty string for that field. For the 'תעשיה' field, select from the 17 UN SDGs based on the content.
-        For the 'לינק להרשמה' field, check the below text for a section that include such a link and extract the URL 
-        or if there's a form for registration put in the URL the text was extracted from.
-        Never estimate values. Specifically for 'משעה' and 'עד שעה', assign values only if they explicitly appear in the text.
+        It is critical that in your response you'll only include info that is explicitly stated in the TEXT:
+        Never estimate values. Fields that you do not find an explicit value for in the TEXT are to remain empty.
         Note the current date and time when extracting the information: {date.today()}. If no year is specified, assume the current year.
+        
+        {existing_context}
+
+        OUTPUT:
+        Format your response as a JSON object with the field names as keys. 
 
         TEXT:
-        {text}
+        {text[:3000]}
         """
         return prompt
 
 
 class GenaiLLMClient(LLMClient):
 
-    def __init__(self):
+    def __init__(self, model='gemini-2.5-pro'):
         """Initialize the LLM client with Gemini model"""
         api_key = get_gemini_api_key()
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set")
 
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-pro')
+        self.model = genai.GenerativeModel(model)
 
     def process_data(self, prompt, temperature=0.0, generation_config_override=None
                      ):
@@ -182,7 +186,7 @@ class GenaiLLMClient(LLMClient):
 
 class OpenAiLLMClient(LLMClient):
 
-    def __init__(self, model="gpt-3.5-turbo"):
+    def __init__(self, model="gpt-4o"):
         """Initialize the LLM client with an OpenAI model"""
         api_key = get_openai_api_key()
         if not api_key:

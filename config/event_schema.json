@@ -12,10 +12,10 @@
     "description": "שם האירוע יופיע באופן מודגש באיזור ראש הפוסט, או בראש הPDF/תמונה של ההזמנה לאירוע"
   },
   "תעשיה": {
-    "description": "יש להסיק מתוך התוכן של האירוע, לאיזו תעשיות אירוע זה רלוונטי: יש לבצע בחירה מרובה מתוך 17 יעדי האו\"ם SDG לפי הפירוט באתר הזה: https://sdgs.un.org/goals"
+    "description": "יש להסיק מהטקסט, לאיזו תעשיות אירוע זה רלוונטי: יש לבצע בחירה של עד 3 מתוך [NO POVERTY,ZERO HUNGER, GOOD HEALTH AND WELL-BEING, QUALITY EDUCATION, GENDER EQUALITY, CLEAN WATER AND SANITATION, AFFORDABLE AND CLEAN ENERGY, DECENT WORK AND ECONOMIC GROWTH, INDUSTRY, INNOVATION AND INFRASTRUCTURE, REDUCED INEQUALITIES, SUSTAINABLE CITIES AND COMMUNITIES, RESPONSIBLE CONSUMPTION AND PRODUCTION, CLIMATE ACTION, LIFE BELOW WATER, LIFE ON LAND, PEACE, JUSTICE AND STRONG INSTITUTIONS, PARTNERSHIPS FOR THE GOALS]"
   },
   "תעשיה 2": {
-    "description": "אפשר להתעלם"
+    "description": "תמיד ריק"
   },
   "אירועי פיזי/אונליין": {
     "description": "חד ערכי, כאן עליך לבצע הסקה מהתוכן. למשל אם כתוב וובינר - אונליין בוודאות. אם יש כתובת למפגש אז זה מפגש פיזי."
@@ -36,10 +36,10 @@
     "description": "דוברים נוספים באירוע, אנשים נוספים ששמם נקשר כמארגנים או דוברים באירוע - הסק עד ארבעה משמעותיים, דגש על נשים (מעדיף לתייג נשים ולקדם אותן)"
   },
   "לינק להרשמה": {
-    "description": "מה הלינק להרשמה לאירוע?"
+    "description": "אם קיים בטקסט, מה ה-URL להרשמה לאירוע?"
   },
   "לינקים נוספים": {
-    "description": "הלינק המקורי לפוסט, או לאתר כלשהו שאיתו התחלנו את התהליך"
+    "description": "אם הטקסט אינו מתוך דף האירוע הרשמי, מה ה-URL של הדף הרשמי?"
   },
   "IMAGE": {
     "description": "לינק לתמונה של הזמנה. יש לשים לב שיש כותרת האירוע בתמונה, ואם יש כמה תמונות יש לבחור את זו שמופיע בה התאריך של האירוע והשעות. אם אין תמונה בנמצא יש להשאיר ריק. כאן יופיע לינק ישיר לתמונה ."
