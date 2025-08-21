@@ -17,9 +17,10 @@ This application aggregates event data from various sources (text, URLs, images,
 
 ### Prerequisites
 
-- Python 3.9+
-- Google Gemini API Key
+- Python 3.10+
+- OpenAI API Key
 - Google Service Account with access to Google Sheets
+- Google Sheets document ID (with write permissions for user account)
 
 ### Installation
 

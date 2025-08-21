@@ -5,7 +5,6 @@ class FreeFormatWorkflow:
     def __init__(self, event_schema, llm_client):
         """Initialize the free format workflow"""
         self.event_schema = event_schema
-        self.llm_client = GenaiLLMClient()
         self.llm_client = llm_client
 
     def process(self, text, existing_event_record=None):
